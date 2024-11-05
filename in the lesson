@@ -1,0 +1,91 @@
+use infs_rubana;
+create table izba2 (
+	adres_budynku varchar(50),
+	nazwa_izby varchar(30),
+	metraz smallint unsigned, 
+	wlasciciel int,
+	primary key (adres_budynku, nazwa_izby),
+	foreign key (wlasciciel) references postac (id_postaci) on delete set null
+);
+
+desc postac;
+
+show create table izba;
+
+alter table izba2 add kolor varchar(30) 
+after metraz;
+
+create table przetwora (
+	id_przetworu int,
+    rok_produkcji date, 
+    id_wykonawcy int,
+    zawartosc varchar(50),
+    dodatek varchar(50),
+    id_konsumenta int,
+    foreign key (id_konsumenta, id_wykonawcy) references postac (id_postaci)
+);
+#insert into postac values(
+#(default, "wiking 1", "wiking", "1564-08-23", 100)
+
+insert into postac values(
+default, "wiking 1", "wiking", "1564-08-23", "100");
+
+insert into postac values (
+	"wiking2", "wiking", "1586-03-14", "58"
+);
+
+insert into postac values (
+	"wiking3", "wiking", "1577-03-01", "93"
+);
+
+insert into postac values (
+	"wiking4", "wiking", "1567-12-15", "45"
+);
+
+insert into postac values (
+	"wiking5", "wiking", "1653-04-6", "115"
+);
+
+#zadanie5
+
+insert into postac values (
+default, "wiking 1", "wiking", "1564-08-23", "100"
+);
+
+create table statek (
+	nazwa_statku int,
+    rodzaj_statku enum,
+    data_wodowania date, 
+    max_ladownosc smallint  
+);
+
+insert into statek values(
+	"titanik", "szybki", "1899-07-25", "350"
+);
+
+insert into statek values(
+	"czarny", "wielki", "1950-01-15", "632"
+);
+
+alter table postac add funkcja varchar(50);
+
+#5 ?????
+
+#6 dodaj klucz obcy w tabeli postac odwolujacy sie do statku
+#krok 1 dodanie kolumny ze statkiem 
+#alter table postac add statek ...
+#krok 2 dodajemy klucz obc
+#alter table postac add foreign key ...
+
+alter table postac add statek;
+alter table postac add foreign key (nazwa_statku) references postac(id_postaci);
+
+
+#7
+#update postac set ... where ...
+
+#8 usuwania danych z tabeli
+#DELETE FROM postac WHERE ...;
+
+#9 usuwanie tabeli (izba)
+#DROP TABLE izba;
