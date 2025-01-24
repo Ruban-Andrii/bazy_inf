@@ -1,0 +1,82 @@
+#lab_4
+-- zadanie 1 
+#a
+DELETE FROM postac
+WHERE id_postaci IN (
+    SELECT id_postaci FROM postac
+    WHERE rodzaj = 'wiking' AND nazwa != 'Bjorn'
+    ORDER BY wiek DESC
+    LIMIT 2
+);
+
+#b
+ALTER TABLE walizka DROP FOREIGN KEY walizka_ibfk_1; 
+ALTER TABLE przetwory DROP FOREIGN KEY przetwory_ibfk_1; 
+ALTER TABLE przetwory DROP FOREIGN KEY przetwory_ibfk_2; 
+ALTER TABLE izba DROP FOREIGN KEY izba_ibfk_1; 
+
+-- zadanie 2
+#a 
+ALTER TABLE postac ADD COLUMN pesel CHAR(11) PRIMARY KEY;
+ALTER TABLE postac DROP PRIMARY KEY;
+
+#b
+ALTER TABLE postac MODIFY COLUMN rodzaj ENUM('wiking', 'ptak', 'kobieta', 'syrena');
+
+#c 
+INSERT INTO postac (pesel, nazwa, rodzaj, data_ur, wiek) VALUES ('12345678901', 'Gertruda Nieszczera', 'syrena', '1990-06-15', 35);
+
+-- zadanie 3 
+#a 
+UPDATE postac SET id_statku = 'Długozębny' WHERE nazwa LIKE '%a%';
+
+#b 
+UPDATE statek SET max_ladownosc = max_ladownosc * 0.7 WHERE YEAR(data_wodowania) BETWEEN 1901 AND 2000;
+
+#c 
+ALTER TABLE postac ADD CONSTRAINT check_wiek CHECK (wiek <= 1000);
+
+-- zadanie 4 
+#a 
+INSERT INTO postac (nazwa, rodzaj, data_ur, wiek) VALUES ('Loko', 'ptak', '2000-01-01', 25);
+
+#b 
+CREATE TABLE marynarz (
+    id_postaci INT AUTO_INCREMENT PRIMARY KEY,
+    nazwa VARCHAR(40),
+    rodzaj ENUM('wiking', 'ptak', 'kobieta', 'syrena') NOT NULL,
+    data_ur DATE,
+    wiek INT UNSIGNED,
+    funkcja VARCHAR(50),
+    id_statku VARCHAR(100),
+    FOREIGN KEY (id_statku) REFERENCES statek(nazwa_statku)
+);
+
+INSERT INTO marynarz (id_postaci, nazwa, rodzaj, data_ur, wiek, funkcja, id_statku)
+SELECT id_postaci, nazwa, rodzaj, data_ur, wiek, funkcja, id_statku FROM postac WHERE id_statku IS NOT NULL;
+
+-- zadanie 5
+#a 
+UPDATE postac SET id_statku = NULL WHERE id_statku IS NOT NULL;
+
+#b 
+DELETE FROM postac WHERE rodzaj = 'wiking' ORDER BY wiek DESC LIMIT 1;
+
+#c 
+DELETE FROM statek;
+
+#d 
+DROP TABLE statek;
+
+#e 
+CREATE TABLE zwierz (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nazwa VARCHAR(100),
+    wiek INT UNSIGNED
+);
+
+#f 
+INSERT INTO zwierz (nazwa, wiek)
+SELECT nazwa, wiek
+FROM postac
+WHERE rodzaj IN ('ptak', 'wąż', 'inny typ zwierzęcia');  
