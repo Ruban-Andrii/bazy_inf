@@ -1,0 +1,62 @@
+#lab_6
+-- zadanie 1
+#1 
+SELECT AVG(waga) AS srednia_waga_wikingow FROM postac WHERE rodzaj = 'wiking';
+
+#2 
+SELECT rodzaj, AVG(waga) AS srednia_waga, COUNT(*) AS liczba_kreatur FROM postac GROUP BY rodzaj;
+
+#3
+SELECT rodzaj, AVG(YEAR(CURRENT_DATE) - YEAR(data_ur)) AS sredni_wiek FROM postac GROUP BY rodzaj;
+
+-- zadanie 2
+#1 
+SELECT rodzaj, SUM(waga) AS suma_wag FROM zasob GROUP BY rodzaj;
+
+#2
+SELECT nazwa, AVG(waga) AS srednia_waga FROM zasob GROUP BY nazwa HAVING COUNT(ilosc) >= 4 AND SUM(waga) > 10;
+
+#3
+SELECT rodzaj, COUNT(DISTINCT nazwa) AS liczba_unikalnych_nazw FROM zasob GROUP BY rodzaj HAVING MIN(ilosc) > 1;
+
+-- zadanie 3
+#1
+SELECT k.nazwa AS kreatura, SUM(z.ilosc) AS laczna_ilosc_zasobow FROM kreatura k
+LEFT JOIN ekwipunek e ON k.id_kreatury = e.id_kreatury
+LEFT JOIN zasob z ON e.id_zasobu = z.id_zasobu GROUP BY k.nazwa;
+
+#2
+SELECT k.nazwa AS kreatura, GROUP_CONCAT(z.nazwa) AS zasoby FROM kreatura k
+LEFT JOIN ekwipunek e ON k.id_kreatury = e.id_kreatury
+LEFT JOIN zasob z ON e.id_zasobu = z.id_zasobu GROUP BY k.nazwa;
+
+#3
+SELECT k.nazwa AS kreatura FROM kreatura k
+LEFT JOIN ekwipunek e ON k.id_kreatury = e.id_kreatury WHERE e.id_zasobu IS NULL;
+
+-- zadanie 4 
+#1 
+SELECT w.nazwa AS wiking, z.nazwa AS zasob FROM wikingowie w 
+NATURAL JOIN ekwipunek e NATURAL JOIN zasob z WHERE YEAR(w.data_urodzenia) BETWEEN 1670 AND 1679;
+
+#2
+SELECT k.nazwa AS kreatura, k.wiek FROM kreatura k
+JOIN ekwipunek e ON k.id_kreatury = e.id_kreatury
+JOIN zasob z ON e.id_zasobu = z.id_zasobu WHERE z.rodzaj = 'jedzenie' ORDER BY k.wiek DESC LIMIT 5;
+
+#3
+SELECT k1.nazwa AS kreatura_1, k2.nazwa AS kreatura_2 FROM kreatura k1, kreatura k2 
+WHERE ABS(k1.id_kreatury - k2.id_kreatury) = 5;
+
+-- zadanie 5 
+#1
+SELECT k.rodzaj, AVG(z.waga) AS srednia_waga_zasobow FROM kreatura k
+JOIN ekwipunek e ON k.id_kreatury = e.id_kreatury
+JOIN zasob z ON e.id_zasobu = z.id_zasobu
+GROUP BY k.rodzaj HAVING k.rodzaj NOT IN ('małpa', 'wąż') AND SUM(e.ilosc) < 30;
+
+#2
+SELECT k.rodzaj, MIN(k.data_urodzenia) AS najstarsza_data_urodzenia, MAX(k.data_urodzenia) AS najmłodsza_data_urodzenia,
+(SELECT k1.nazwa FROM kreatura k1 WHERE k1.data_urodzenia = MIN(k.data_urodzenia) AND k1.rodzaj = k.rodzaj LIMIT 1) AS najstarsza_kreatura,
+(SELECT k2.nazwa FROM kreatura k2 WHERE k2.data_urodzenia = MAX(k.data_urodzenia) AND k2.rodzaj = k.rodzaj LIMIT 1) AS najmłodsza_kreatura 
+FROM kreatura k GROUP BY k.rodzaj;
