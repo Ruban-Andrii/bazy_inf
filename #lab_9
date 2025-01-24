@@ -1,0 +1,80 @@
+#lab_9
+-- zadanie 1.1
+#1
+SELECT nazwisko FROM pracownik ORDER BY nazwisko ASC;
+
+#2
+SELECT imie, nazwisko, pensja FROM pracownik WHERE YEAR(data_urodzenia) > 1979;
+
+#3
+SELECT * FROM pracownik WHERE pensja BETWEEN 3500 AND 5000;
+
+#4
+SELECT towar_id, ilosc FROM stan_magazynowy WHERE ilosc > 10;
+
+#5
+SELECT * FROM towar WHERE nazwa LIKE 'A%' OR nazwa LIKE 'B%' OR nazwa LIKE 'C%';
+
+#6
+SELECT * FROM klient WHERE typ_klienta = 'indywidualny';
+
+#7
+SELECT * FROM zamowienie ORDER BY data_zamowienia DESC LIMIT 10;
+
+#8
+SELECT * FROM pracownik ORDER BY pensja ASC LIMIT 5;
+
+#9
+SELECT * FROM towar WHERE nazwa NOT LIKE '%a%' ORDER BY cena DESC LIMIT 10;
+
+#10
+SELECT * FROM towar WHERE jednostka_miary = 'szt' ORDER BY nazwa ASC, cena_zakupu DESC;
+
+#11
+CREATE TABLE towary_powyzej_100 AS SELECT * FROM towar WHERE cena >= 100;
+
+#12
+CREATE TABLE pracownik_50_plus AS SELECT * FROM pracownik WHERE YEAR(CURDATE()) - YEAR(data_urodzenia) >= 50;
+
+-- zadanie 1.2
+#1
+SELECT p.imie, p.nazwisko, d.nazwa FROM pracownik p JOIN dzial d ON p.dzial_id = d.id;
+
+#2
+SELECT t.nazwa AS nazwa_towaru, k.nazwa AS nazwa_kategorii, sm.ilosc 
+FROM stan_magazynowy sm JOIN towar t ON sm.towar_id = t.id 
+JOIN kategoria k ON t.kategoria_id = k.id ORDER BY sm.ilosc DESC;
+
+#3
+SELECT * FROM zamowienie WHERE status = 'anulowane';
+
+#4
+SELECT * FROM klient WHERE adres_podstawowy LIKE '%Olsztyn%';
+
+#5
+SELECT jm.nazwa FROM jednostka_miary jm
+LEFT JOIN towar t ON jm.id = t.jednostka_miary_id
+LEFT JOIN stan_magazynowy sm ON t.id = sm.towar_id WHERE sm.towar_id IS NULL;
+
+#6 
+SELECT z.id AS numer_zamowienia, t.nazwa AS nazwa_towaru, po.ilosc, po.cena FROM zamowienie z
+JOIN pozycja_zamowienia po ON z.id = po.zamowienie_id
+JOIN towar t ON po.towar_id = t.id WHERE YEAR(z.data_zamowienia) = 2018;
+
+#7 
+CREATE TABLE towary_full_info AS
+SELECT t.nazwa AS nazwa_towaru, t.cena_zakupu, k.nazwa AS kategoria, sm.ilosc, jm.nazwa AS jednostka_miary FROM stan_magazynowy sm
+JOIN towar t ON sm.towar_id = t.id
+JOIN kategoria k ON t.kategoria_id = k.id
+JOIN jednostka_miary jm ON t.jednostka_miary_id = jm.id;
+
+#8
+SELECT po.zamowienie_id, t.nazwa AS nazwa_towaru, po.ilosc, po.cena FROM pozycja_zamowienia po
+JOIN towar t ON po.towar_id = t.id
+JOIN zamowienie z ON po.zamowienie_id = z.id ORDER BY z.data_zamowienia ASC LIMIT 5;
+
+#9 
+SELECT * FROM zamowienie WHERE status != 'zrealizowane';
+
+#10 
+SELECT adres FROM adres WHERE kod_pocztowy NOT REGEXP '^[0-9]{2}-[0-9]{3}$';
