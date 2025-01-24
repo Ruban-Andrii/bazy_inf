@@ -1,0 +1,61 @@
+#lab_7
+-- zadanie 1 
+#1
+CREATE TABLE kreatura AS SELECT * FROM wikingowie.kreatura;
+CREATE TABLE uczestnicy AS SELECT * FROM wikingowie.uczestnicy;
+CREATE TABLE etapy_wyprawy AS SELECT * FROM wikingowie.etapy_wyprawy;
+CREATE TABLE sektor AS SELECT * FROM wikingowie.sektor;
+CREATE TABLE wyprawa AS SELECT * FROM wikingowie.wyprawa;
+
+#2
+SELECT k.nazwa FROM kreatura k
+LEFT JOIN uczestnicy u ON k.id_kreatury = u.id_kreatury WHERE u.id_kreatury IS NULL;
+
+#3
+SELECT w.nazwa AS wyprawa_nazwa, SUM(e.ilosc) AS suma_ekwipunku FROM wyprawa w
+JOIN etapy_wyprawy ew ON w.id_wyprawy = ew.id_wyprawy
+JOIN uczestnicy u ON ew.id_etapu = u.id_etapu
+JOIN ekwipunek e ON u.id_kreatury = e.id_kreatury GROUP BY w.nazwa;
+
+-- zadanie 2 
+#1 
+SELECT w.nazwa AS wyprawa_nazwa, COUNT(u.id_kreatury) AS liczba_uczestnikow, GROUP_CONCAT(k.nazwa ORDER BY k.nazwa ASC) AS uczestnicy FROM wyprawa w
+JOIN etapy_wyprawy ew ON w.id_wyprawy = ew.id_wyprawy
+JOIN uczestnicy u ON ew.id_etapu = u.id_etapu
+JOIN kreatura k ON u.id_kreatury = k.id_kreatury GROUP BY w.nazwa;
+
+#2 
+SELECT w.nazwa AS wyprawa_nazwa, ew.kolejnosc AS etap_kolejnosc, s.nazwa AS sektor_nazwa, k.nazwa AS kierownik FROM wyprawa w
+JOIN etapy_wyprawy ew ON w.id_wyprawy = ew.id_wyprawy
+JOIN sektor s ON ew.id_sektora = s.id_sektora
+JOIN kreatura k ON ew.id_kreatury = k.id_kreatury ORDER BY w.data_poczatku ASC, ew.kolejnosc ASC;
+
+-- zadanie 3
+#1 
+SELECT s.nazwa AS sektor_nazwa, IFNULL(COUNT(ew.id_etapu), 0) AS liczba_odwiedzin FROM sektor s
+LEFT JOIN etapy_wyprawy ew ON s.id_sektora = ew.id_sektora GROUP BY s.nazwa;
+
+#2 
+SELECT k.nazwa AS kreatura_nazwa, IF(COUNT(u.id_etapu) > 0, 'brał udział w wyprawie', 'nie brał udziału w wyprawie') AS status FROM kreatura k
+LEFT JOIN uczestnicy u ON k.id_kreatury = u.id_kreatury
+LEFT JOIN etapy_wyprawy ew ON u.id_etapu = ew.id_etapu GROUP BY k.nazwa;
+
+-- zadanie 4 
+#1 
+SELECT w.nazwa AS wyprawa_nazwa, SUM(LENGTH(d.dziennik)) AS suma_znakow FROM wyprawa w
+JOIN etapy_wyprawy ew ON w.id_wyprawy = ew.id_wyprawy
+JOIN dziennik d ON ew.id_etapu = d.id_etapu GROUP BY w.nazwa HAVING SUM(LENGTH(d.dziennik)) < 400;
+
+#2 
+SELECT w.nazwa AS wyprawa_nazwa, AVG((z.waga * e.ilosc)) AS srednia_wag FROM wyprawa w
+JOIN etapy_wyprawy ew ON w.id_wyprawy = ew.id_wyprawy
+JOIN uczestnicy u ON ew.id_etapu = u.id_etapu
+JOIN ekwipunek e ON u.id_etapu = e.id_etapu
+JOIN zasob z ON e.id_zasobu = z.id_zasobu GROUP BY w.nazwa;
+
+-- zadanie 5 
+#1 
+SELECT k.nazwa AS kreatura_nazwa, DATEDIFF(w.data_rozpoczecia, k.data_urodzenia) AS wiek_w_dniach FROM kreatura k
+JOIN etapy_wyprawy ew ON k.id_kreatury = ew.id_kreatury
+JOIN wyprawa w ON ew.id_wyprawy = w.id_wyprawy
+JOIN etapy_wyprawy_tekst et ON ew.id_etapu = et.id_etapu WHERE et.etap_nazwa = 'chatka dziadka';
