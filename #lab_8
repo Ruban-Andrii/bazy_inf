@@ -1,0 +1,120 @@
+#lab_8
+-- zadanie 1 
+#1 
+DELIMITER //
+
+CREATE TRIGGER check_waga_before_insert_update
+BEFORE INSERT OR UPDATE ON kreatura
+FOR EACH ROW
+BEGIN
+  IF NEW.waga <= 0 THEN
+    SET NEW.waga = 0;
+  END IF;
+END//
+
+DELIMITER ;
+
+-- zadanie 2 
+#1
+CREATE TABLE archiwum_wypraw (
+    id_wyprawy INT,
+    nazwa VARCHAR(255),
+    data_rozpoczecia DATE,
+    data_zakonczenia DATE,
+    kierownik VARCHAR(255)
+);
+
+#2
+DELIMITER //
+
+CREATE TRIGGER after_delete_wyprawa
+AFTER DELETE ON wyprawa
+FOR EACH ROW
+BEGIN
+    INSERT INTO archiwum_wypraw (id_wyprawy, nazwa, data_rozpoczecia, data_zakonczenia, kierownik)
+    VALUES (OLD.id_wyprawy, OLD.nazwa, OLD.data_rozpoczecia, OLD.data_zakonczenia, 
+            (SELECT nazwa FROM kreatura WHERE id_kreatury = OLD.id_kreatury));
+END//
+
+DELIMITER ;
+
+-- zadanie 3 
+#1
+DELIMITER //
+
+CREATE PROCEDURE eliksir_sily(IN kreatura_id INT)
+BEGIN
+    UPDATE kreatura
+    SET udzwig = udzwig * 1.20
+    WHERE id_kreatury = kreatura_id;
+END//
+
+DELIMITER ;
+
+#2
+DELIMITER //
+
+CREATE FUNCTION to_upper_case(input_text VARCHAR(255))
+RETURNS VARCHAR(255)
+DETERMINISTIC
+BEGIN
+    RETURN UPPER(input_text);
+END//
+
+DELIMITER ;
+
+-- zadanie 4
+#1
+CREATE TABLE system_alarmowy (
+    id_alarmu INT AUTO_INCREMENT PRIMARY KEY,
+    wiadomosc VARCHAR(255)
+);
+
+#2
+DELIMITER //
+
+CREATE TRIGGER teściowa_alarm_trigger
+AFTER INSERT ON wyprawa
+FOR EACH ROW
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM uczestnicy u
+        JOIN kreatura k ON u.id_kreatury = k.id_kreatury
+        JOIN sektor s ON u.id_sektora = s.id_sektora
+        WHERE u.id_wyprawy = NEW.id_wyprawy
+        AND k.nazwa = 'Teściowa'
+        AND s.nazwa = 'Domek dziadka'
+    ) THEN
+        INSERT INTO system_alarmowy (wiadomosc)
+        VALUES ('Teściowa nadchodzi !!!');
+    END IF;
+END//
+
+DELIMITER ;
+
+-- zadanie 5
+#1
+DELIMITER //
+
+CREATE PROCEDURE oblicz_udzwig(
+    OUT avg_udzwig DECIMAL(10, 2),
+    OUT sum_udzwig DECIMAL(10, 2),
+    OUT max_udzwig DECIMAL(10, 2)
+)
+BEGIN
+    SELECT 
+        AVG(udzwig), 
+        SUM(udzwig), 
+        MAX(udzwig)
+    INTO 
+        avg_udzwig, 
+        sum_udzwig, 
+        max_udzwig
+    FROM 
+        kreatura;
+END//
+
+DELIMITER ;
+
+#2
